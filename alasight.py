@@ -2143,8 +2143,8 @@ def parse_args():
                      help="alamem seed k-mer size (default: 15, larger than alamem for large database); larger is less sensitive but reduces false positives for large databases")
     run.add_argument("--min-len", type=int, default=40,
                      help="minimum alamem hit length in bp (default: 40)")
-    run.add_argument("--min-ani", type=float, default=90.0,
-                     help="minimum percent identity / ANI of a hit (default: 90)")
+    run.add_argument("--min-ani", type=float, default=96.0,
+                     help="minimum percent identity / ANI of a hit (default: 96)")
     run.add_argument("--size-filter", type=int, default=150,
                      help="drop clustered regions smaller than this many bp (default: 150)")
     run.add_argument("--cluster-size", type=int, default=0,
