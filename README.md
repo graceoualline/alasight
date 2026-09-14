@@ -162,11 +162,15 @@ We use the Time Tree of Life to calculate divergence times between species. If a
 ## Workflow
 **skani search:** Queries all input sequences against the skani sketch database to identify reference sequences with ≥ 95% ANI.
 
-**Divergence filter:** Retains hits where query and reference species have <=95% ANI.
+**Divergence filter:** Retains hits with >=96% ANI (configurable) where query and reference species have <=95% ANI.
 
-**Overlap-divergence filter:** Identifies overlapping hit pairs whose reference sequences are from divergent lineages (<=95% ANI or >= 1 MYA). Always runs. Note that if you choose representative genomes, this is just an overlap filter.
+**Overlap-divergence filter:** Identifies overlapping hit pairs whose reference sequences are from divergent lineages (<=95% ANI or >= 1 MYA). Always runs. Note that if you choose representative genomes, this is just an overlap filter, and so we won't recompute divergence when using GTDB representative genomes. The divergent lineage option is there in case you use a non-representative genome set.
 
-**Size + cluster filter:** Merges nearby regions and removes small ones to produce the final MGE calls.
+**Size + cluster filter:** Merges nearby regions and removes small ones.
+
+**Dustmasker filter:** Removes low-complexity regions regions.
+
+**Depth + Sparsity computation:** This produces a new depth chart, where instead of listing hits, we instead measure how many hits there are that support each interval of the genome being HGT. Also, if you run `alasight_plot.py mirror out_dust_regions_depth.tsv depth.html`, we will generate an interactive HTML of the genome, the depth of support of each region, and the sparsity of that support within the subtree containing all the hits for the region.
 
 
 ## Citation
