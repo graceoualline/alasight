@@ -1,95 +1,93 @@
 # alasight
 
-ALASIGHT
-
-**A**pproximate **L**ocal **A**lignment for **SIG**natures of **H**orizontal **T**ransfer.
+ALASIGHT - **A**pproximate **L**ocal **A**lignment for **SIG**natures of **H**orizontal **T**ransfer.
 A tool for detecting signatures of horizontal gene transfer, which might signal the presence of Mobile Genetic Elements (MGEs) using alamem and phylogenetic divergence analysis.
 ## Overview
 
-Alasight finds signatures of horizontal gene transfer by using alamem to find all hits if a query sequence across a GTDB database, applying divergence filtering, and then running an overlap-divergence filter to identify regions supported by alignments to distantly related species. It uses the TimeTree of Life to calculate divergence times, and skani for average nucleotide identity (ANI) lookups. We designed this tool to detect HGT signatures, with the goal to find novel MGEs that may not be within a reference MGE databases. We do so by doing a string similarity search across entire bacterial genome databases.
+Alasight finds signatures of horizontal gene transfer by using alamem to find all hits of a query sequence across a GTDB database, applying divergence filtering, and then running an overlap-divergence filter to identify regions supported by alignments to distantly related species. It uses the TimeTree of Life to calculate divergence times, and skani for average nucleotide identity (ANI) lookups. We designed this tool to detect HGT signatures, with the goal of finding novel MGEs that may not be within a reference MGE databases. 
+
+## Requirements
+
+- **conda** — `setup.sh` uses it to create the environment.
 
 ## Installation
-Install alasight:
+
 ```bash
 git clone https://github.com/graceoualline/alasight.git
 cd alasight
+bash setup.sh
+export PATH="$HOME/bin:$PATH"            
+conda activate alasight
 ```
 
-We have included in the references folder a species conversion table for GTDB r214 reference genomes to NCBI annotations, though you will have to unxz it. This allows us to map those hits onto the TimeTree of Life (also included) for divergence computations.
+`setup.sh` creates the `alasight` conda environment required to run the software, downloads the prebuilt alamem aligner, and decompresses required reference files shipped in `references-compressed/`
+(the TimeTree of Life newick and the GTDB-NCBI species table). 
 
-You will need to have the [GTDB r214 reference database](https://data.gtdb.ecogenomic.org/releases/release214/214.1/genomic_files_reps/gtdb_genomes_reps_r214.tar.gz) untarred somewhere (the individual fastas can stay gzipped or be decompressed, as you will).
-Then generate a file with absolute paths to all of the genomes using
+### alamem
+
+alamem is required (alasight calls it internally). `setup.sh` installs it automatically.
+
+- **Prebuilt binary (default):** works on Linux x86-64 / ARM. `setup.sh` downloads it for you.
+- **Build from source:** `BUILD_ALAMEM=1 bash setup.sh`. Requires rust ([https://rustup.rs](https://rustup.rs)) and a C compiler. Use this if the prebuilt binary doesn't run on your system. See the [alamem repository](https://github.com/yunwilliamyu/alamem) for full build details.
+
+### Building the GTDB database
+
+Running alasight requires a database. By default alasight uses GTDB r214, for setup run:
+
 ```bash
-cp -a references-compressed references-local
-cd references-local/
-find [path/to/genomes_reps_r214] > gtdb_list.txt
-unxz *.xz
-
+bash build_gtdb_db.sh <workdir> <threads>
 ```
 
-You should have the following files:
-```
-└── references-local
-    ├── gtdbr214rep_to_ncbi.tsv
-    └── TimeTree_v5_Final.nwk
-```
+**Resources and timing.** The build has three stages: scanning the genomes, indexing, and building the skani sketch.  
 
-Also, you'll need to install required Python packages
-```
-### Required Python Packages
+Guidance:
+
+- **Threads:** the FASTA scan and skani sketch both parallelize, ~16 is ideal.
+- **Memory:** ~32GB is recommended for the full GTDB build. 
+- **Resumable:** every step is skipped if its output already exists, so re-running the same command after an interruption continues where it left off. If you already have the GTDB genomes downloaded and extracted, place them as `<workdir>/gtdb_genomes_reps_r214/` and the script skips the download.
+
+### Creating a Custom Database
+
+If you want to use your own genome collection, you only need the following files:
+- sequence_id_to_species_id.txt (in TSV format)
+- species_tree.nwk (in Newark file format)
+- fasta_list.txt (pointing to all the fasta files to be indexed)
 ```bash
-pip install biopython tqdm pyyaml matplotlib pydustmasker
+./alasight.py build-db -i fasta_list.txt -d database -tr tree -n species_tree.nwk -s sequence_id_to_species_id.txt -t 64 [--representatives]
 ```
-### Prerequisites
-Please ensure you have the following tools installed:
-- Python 3.7+
-- skani: https://github.com/bluenote-1577/skani
-- alamem: https://github.com/yunwilliamyu/alamem
-
+If you can guarantee that your genome collection is all separate species, as it is in the GTDB r214 representative genomes collection which we use, you should set --representatives. This way we can assume that everything is distinct and don't need to run an additional 95\% ANI check.
 ## Usage
 
-### Quick Start
-
 ```bash
-# To see all input parameters
-python3 alasight.py -h
+# see all options
+./alasight.py -h
 
-# build database (assumes you've already created gtdb_list.txt with correct absolute paths
-mkdir database
-mkdir tree
-chmod +x alasight.py
-./alasight.py build-db \
-  -i references-local/gtdb_list.txt \
-  -d database -tr tree \
-  -n references-local/TimeTree_v5_Final.nwk \
-  -s references-local/gtdbr214rep_to_ncbi.tsv \
-  -t 64 --representatives
-
-# command line with only required arguments
-./alasight.py run -d database -q input.fasta -o out_dir -t 64
-
+# run a query against the database
+./alasight.py run -d <workdir>/database -q input.fasta -o out_dir -t <cores>
 ```
+
 ### Parameters
 
 #### Required Arguments
 | Parameter | Description |
 |-----------|-------------|
-| `-q, --query`| Path to the query FASTA file |
-| `-o, --output`| Name of your output directory 
-| `-d, --database`| Path to the alasight database directory| |
-| `-tr, --tree`| Path to the phylogenetic tree directory |
+| `-q, --query` | Path to the query FASTA file |
+| `-o, --output` | Name of your output directory |
+| `-d, --database` | Path to the alasight database directory |
 
 #### Optional Arguments
 | Parameter | Default | Description |
 |-----------|---------|-------------|
+| `-tr, --tree` | from database| Path to the preprocessed tree directory (defaults to the tree the database was built against).* | 
 | `-t, --threads` | 1 | Number of threads. **Highly recommended to increase.** |
-| `-s, --species-file` | auto-detect | Tab-separated file assigning a species to each sequence ID. Cannot be used with `-s`. |
-| `--species` | auto-detect | Species name for all sequences in the input FASTA (replace spaces with `_`). Output metadata only, doesn't affect hits |
+| `-s, --species-file` | auto-detect | Tab-separated file assigning a species to each sequence ID. Cannot be used with `--species`. |
+| `--species` | auto-detect | Species name for all sequences in the input FASTA (replace spaces with `_`). Output metadata only, doesn't affect hits. |
 | `--min-len` | 40 | Minimum length of alamem hit. |
-| `--min-ani` | 90 | Minimum percent identity: `(matches / (Q_end − Q_start)) × 100`. |
+| `--min-ani` | 96 | Minimum percent identity: `(matches / (Q_end − Q_start)) × 100`. |
 | `--size-filter` | 150 | Discard final regions smaller than this many bp. |
 | `--cluster-size` | 0 | Merge final regions within this many bp of each other. |
 
+\* We use the Time Tree of Life to calculate divergence times between species. If a new .nwk file from the Time Tree becomes available, you can use `build-tree` directly (normally it is called indirectly from `build-db`).
 
 ## Filters
 Filters are described in further detail, and their processes are illustrated in our paper (add cite).
@@ -108,59 +106,35 @@ This filter produces ```{output_name}_overlap_div.tsv```:
 Final regions are built from the overlap-div output:
 - Intervals within `--cluster-size` bp of each other are merged (default: 0 bp)
 - Regions smaller than `--size-filter` bp are discarded (default: 150 bp)
-- Produces ```{output_name}_final_regions.tsv``` and ```{output_name}_final_regions_summary.tsv```
 
 ### Output Files
+
+`run` writes several files into the output directory, in pipeline order:
+
 ```
 output_directory/
-├── output_name_alamem_results.tsv         # Raw BLAT alignments
-├── output_name_first_div_output.tsv       # ANI Divergence-filtered results
-├── output_name_overlap_div.tsv            # Overlap + divergence (time and ANI) filtered results
-├── output_name_final_regions.tsv          # Final MGE regions (size + cluster filtered)
-├── output_name_final_regions_summary.tsv  # Per-region summary statistics
-├── skani_ani.tsv                          # Cached skani query-vs-reference ANI results
+├── <name>_alamem_results.tsv            # raw alamem hits
+├── <name>_first_div_output.tsv          # hits kept by the ANI filter
+├── <name>_overlap_div.tsv               # overlapping hit pairs from different clades
+├── <name>_clustered_regions.tsv         # merged / size-filtered / clustered regions
+├── <name>_clustered_regions_summary.tsv # one row per clustered region
+├── <name>_clustered_regions_depth.tsv   # regions cut at every depth change
+├── <name>_dust_regions.tsv              # regions left after DUST masking
+├── <name>_dust_regions_summary.tsv      # one row per surviving region
+└── <name>_dust_regions_depth.tsv        # regions cut at every depth change
 ```
 
-All output files begin with a `#`-prefixed configuration header recording the parameters and timestamp of the run.
 
-**`final_regions.tsv`** contains one row per final HGT region. Reference metadata columns (T name, Divergence Time, etc.) are merged using `|` as a row delimiter and `,` within a row — each `|`-delimited token represents one contributing overlap-div hit (which itself is a pair of reference sequences). To recover individual contributing hits, split on `|`.
+The `_dust_regions*` files are the final output (after low-complexity masking); the `_clustered_regions*` files are the same regions before dustmasking. All files begin with a `#`-prefixed configuration header recording the run's parameters and timestamp.
 
-**`final_regions_summary.tsv`** contains one row per region with the following columns:
-
-| Column | Description |
-|--------|-------------|
-| `Q name` | Query sequence identifier |
-| `Q size` | Full length of the query sequence (bp) |
-| `Q start` / `Q end` | Coordinates of the final region on the query |
-| `Query Species` | Species of the query sequence |
-| `Num Regions` | Number of overlap-div hits that were merged into this region |
-| `Num Unique Species` | Number of distinct reference species (by tree leaf name) that contributed hits |
-| `Avg Divergence Time` | Average divergence time (MYA) across all contributing hits with a known divergence |
 
 ### Resume Functionality
 Important: The program is designed to resume from interruptions by checking for existing files. If a run is stopped prematurely, it will restart from where it left off. Avoid creating files with names that could overlap with alasight's output to prevent conflicts.
 
-## Database Setup
-
-### Creating a Custom Database
-If you want to use your own genome collection, you only need the following files:
-- sequence_id_to_species_id.txt (in TSV format)
-- species_tree.nwk (in Newark file format)
-- fasta_list.txt (pointing to all the fasta files to be indexed)
-```bash
-./alasight.py build-db -i fasta_list.txt -d database -tr tree -n species_tree.nwk -s sequence_id_to_species_id.txt -t 64 [--representatives]
-```
-If you can guarantee that your genome collection is all separate species, as it is in the GTDB r214 representative genomes collection which we use, you should set --representatives. This way we can assume that everything is distinct and don't need to run an additional 95\% ANI check.
-
-## Phylogenetic Tree
-We use the Time Tree of Life to calculate divergence times between species. If a new .nwk file from the Time Tree becomes available, you can use the `build-tree` option directly. (normally it is called indirectly from `build-db`).
-
-## Performance Tips
-1. **Use many threads:** `-t 64` or higher significantly speeds up alamem and skani steps.
-2. **Resume feature:** Take advantage of the automatic resume capability for the build-db — re-running the same command after an interruption picks up from where it left off.
 
 ## Workflow
-**skani search:** Queries all input sequences against the skani sketch database to identify reference sequences with ≥ 95% ANI.
+
+**alamem alignment:** the query is aligned against the streamed reference database.
 
 **Divergence filter:** Retains hits with >=96% ANI (configurable) where query and reference species have <=95% ANI.
 
@@ -168,9 +142,15 @@ We use the Time Tree of Life to calculate divergence times between species. If a
 
 **Size + cluster filter:** Merges nearby regions and removes small ones.
 
-**Dustmasker filter:** Removes low-complexity regions regions.
+**Dustmasker filter:** Removes low-complexity regions.
 
-**Depth + Sparsity computation:** This produces a new depth chart, where instead of listing hits, we instead measure how many hits there are that support each interval of the genome being HGT. Also, if you run `alasight_plot.py mirror out_dust_regions_depth.tsv depth.html`, we will generate an interactive HTML of the genome, the depth of support of each region, and the sparsity of that support within the subtree containing all the hits for the region.
+**Depth + Sparsity computation:** This produces a new depth chart, where instead of listing hits, we instead measure how many hits there are that support each interval of the genome being HGT. Running `alasight_plot.py mirror <name>_dust_regions_depth.tsv depth.html` generates an interactive HTML view of the genome and the depth of support across each region, and the sparsity of that support within the subtree containing all the hits for the region as well.
+
+
+## Performance Tips
+1. **Use many threads:** `-t 64` or higher significantly speeds up alamem and skani steps.
+2. **Resume feature:** Take advantage of the automatic resume capability for the build-db — re-running the same command after an interruption picks up from where it left off.
+
 
 
 ## Citation

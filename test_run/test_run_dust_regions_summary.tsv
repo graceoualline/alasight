@@ -1,0 +1,30 @@
+# ALASIGHT run configuration
+# date: 2026-09-25 20:33:30
+# cluster_size: 0
+# command: run
+# database: /blue/boucher/sakshi.pandey/GTDB/database
+# depth: True
+# dustmasker_level: 20
+# dustmasker_window: 64
+# func: <function cmd_run at 0x14fc967620c0>
+# kmer_size: 15
+# max_masked_frac: 0.5
+# min_ani: 96.0
+# min_len: 40
+# output: test_run
+# query: test/acrB.fasta
+# ref_representatives: None
+# size_filter: 150
+# species: None
+# species_file: None
+# threads: 16
+# tree: None
+#
+# dust filter: dropped 0 region(s) with masked fraction >= 0.5
+#
+Q name	Q size	Q start	Q end	Query Species	Num Hits	Num Clades	Peak Clades	Tree Leaves Hit	Tree Leaves In LCA	Avg Divergence Time	Max Divergence Time	Evidence
+acrB	3150	0	356	unclassified	131	33	32	49	7865	739.7766	3134.05	mixed
+acrB	3150	609	770	unclassified	5	3	3	3	44	358.9817	358.9817	tree
+acrB	3150	967	1490	unclassified	412	134	106	158	3058	2100.487	2662.172	mixed
+acrB	3150	2261	2480	unclassified	7	4	3	3	140	525.5516	608.8365	mixed
+acrB	3150	2502	3002	unclassified	71	19	15	36	140	394.6752	608.8365	mixed

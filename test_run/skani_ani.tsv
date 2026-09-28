@@ -1,0 +1,2 @@
+Ref_file	Query_file	ANI	Align_fraction_ref	Align_fraction_query	Ref_name	Query_name
+/blue/boucher/sakshi.pandey/GTDB/gtdb_genomes_reps_r214/database/GCF/000/006/945/GCF_000006945.2_genomic.fna.gz	/blue/boucher/sakshi.pandey/alasight/test/acrB.fasta	100.00	0.07	100.00	NC_003197.2 Salmonella enterica subsp. enterica serovar Typhimurium str. LT2, complete genome	acrB
