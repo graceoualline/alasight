@@ -1,14 +1,16 @@
 name: alasight
 channels:
-  - bioconda
   - conda-forge
+  - bioconda
+  - nodefaults
 dependencies:
   - python>=3.10,<3.13   
-  - numpy                
-  - ete3                 
-  - skani>=0.3.2         
+  - numpy
+  - six
+  - skani>=0.3.2
   - pandas
   - matplotlib
   - pip
   - pip:
-      - pydustmasker     
+      - ete3
+      - pydustmasker

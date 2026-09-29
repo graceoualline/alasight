@@ -35,7 +35,8 @@ alamem is required (alasight calls it internally). `setup.sh` installs it automa
 Running alasight requires a database. By default alasight uses GTDB r214, for setup run:
 
 ```bash
-bash build_gtdb_db.sh <workdir> <threads>
+mkdir work_dir
+bash build_gtdb_db.sh work_dir <threads>
 ```
 
 **Resources and timing.** The build has three stages: scanning the genomes, indexing, and building the skani sketch.  
@@ -64,9 +65,26 @@ If you can guarantee that your genome collection is all separate species, as it 
 
 # run a query against the database
 ./alasight.py run -d <workdir>/database -q input.fasta -o out_dir -t <cores>
-```
 
-### Parameters
+# EXAMPLE / TEST
+# should take 2 minutes using 46 threads
+./alasight.py run -d work_dir/alasight_gtdb/database -tr work_dir/alasight_gtdb/tree -q test/plasmid_and_conserved_example.fasta -o test/pnc_test_results/ -t 46
+```
+#### Visualization
+
+```bash
+# Visualize alasight output as an interactive mirror plot or png
+python3 helper/alasight_plot.py mirror out_dir/<name>_dust_regions_depth.tsv <out_name>.html
+python3 helper/alasight_plot.py mirror out_dir/<name>_dust_regions_depth.tsv <out_name>.png
+
+# EXAMPLE
+# if you ran the test above, you can visualize it with the following command
+python3 helper/alasight_plot.py mirror test/pnc_test_results/pnc_test_results_dust_regions_depth.tsv test/pnc_test_results/plasmid_and_conserved.html #or .png
+# should see a plasmid inserted between 719 to 22593, and a 16S protein from 49063 to 50588
+```
+![Mirror plot of a plasmid and 16S protein](example_figures/plasmid_and_conserved.png)
+
+### alasight Parameters 
 
 #### Required Arguments
 | Parameter | Description |
@@ -127,6 +145,46 @@ output_directory/
 
 The `_dust_regions*` files are the final output (after low-complexity masking); the `_clustered_regions*` files are the same regions before dustmasking. All files begin with a `#`-prefixed configuration header recording the run's parameters and timestamp.
 
+### Visualization Parameters
+`helper/alasight_plot.py` has four modes:
+
+```bash
+python3 helper/alasight_plot.py <mode> <input.tsv> <output> [options]
+```
+
+| Mode | Input | Description |
+|------|-------|-------------|
+| `mirror` | `<name>_dust_regions_depth.tsv` | Depth above the axis, breadth below it. Both are log2, so the two halves are directly comparable. |
+| `depth` | `<name>_dust_regions_depth.tsv` | Number of clades supporting each position, drawn as log2(depth). |
+| `fraction` | `<name>_dust_regions_depth.tsv` | How sparsely the LCA subtree was hit, drawn as −log2(Tree Leaves Hit / Tree Leaves In LCA). Vertically inherited genes stay flat; transferred genes stand tall. |
+| `area` | `<name>_dust_regions_summary.tsv` | Every region shaded, labelled with its clade count. |
+
+The output format follows the file extension: `.html` gives an interactive page (`mirror`, `depth` and `fraction` only), `.png` a raster image, and `.svg` or no extension a vector image.
+
+#### Options for all modes
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `--fasta` | none | FASTA to take sequence lengths from, when the TSV has no `Q size` column. |
+| `--only` | all | Plot only these sequences 1-based panel numbers, e.g. `3,7,12`. |
+| `--known` / `--no-known` | auto-detect | Treat query names as `plasmid_id,start,end,host_id` and mark the known plasmid region. |
+| `--dpi` | 300 | Raster resolution. Ignored for vector output. |
+| `--no-compact` | off | Skip the SVG path-data rewrite. |
+| `--svg-precision` | none | Round SVG coordinates to this many decimals. |
+
+#### Mode-specific options
+| Mode | Parameter | Default | Description |
+|------|-----------|---------|-------------|
+| `mirror` | `--min-depth` | 0 | Only plot queries reaching this depth somewhere. |
+| `mirror` | `--max-fraction` | none | Only plot queries reaching a fraction at or below this somewhere. |
+| `mirror` | `--ticks` | auto | Fix the axis to this many ticks on each side (top 2^N, bottom 1/2^N). Use the same value to compare figures across samples; bars beyond it are clipped. |
+| `depth` | `--min-depth` | 0 | Only plot queries reaching this depth somewhere. |
+| `depth` | `--linear` | off | Plot raw clade counts instead of log2. |
+| `fraction` | `--max-fraction` | none | Only plot queries reaching a fraction at or below this somewhere. |
+| `fraction` | `--linear` | off | Plot 1 − fraction instead of −log2(fraction). |
+| `area` | `--size-filter` | 0 | Drop regions shorter than this many bp. |
+| `area` | `--cluster` | 0 | Merge regions within this many bp of each other. |
+
+
 
 ### Resume Functionality
 Important: The program is designed to resume from interruptions by checking for existing files. If a run is stopped prematurely, it will restart from where it left off. Avoid creating files with names that could overlap with alasight's output to prevent conflicts.
@@ -153,10 +211,12 @@ Important: The program is designed to resume from interruptions by checking for 
 
 
 
-## Citation
+## Citation and Data
 
 If you use alasight in your research, please cite:
 [Add later]
+
+All data used in the publication is avaliable here: https://github.com/graceoualline/alasight_testdata
 
 ## Support
 

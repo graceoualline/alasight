@@ -6,3 +6,4 @@ references-compressed/*.nwk references-compressed/*.tsv
 
 references-compressed/*.nwk
 references-compressed/*.tsv
+work_dir/

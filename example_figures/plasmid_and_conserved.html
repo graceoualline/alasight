@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>alasight mirror - pnc_test_results_dust_regions_depth.tsv</title>
+<style>
+  :root { --fg:#222; --muted:#666; --line:#bbb; --bg:#fff; }
+  body { margin:0; padding:18px 20px 40px; background:var(--bg); color:var(--fg);
+         font:13px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  h1 { font-size:15px; font-weight:600; margin:0 0 2px; }
+  .sub { color:var(--muted); margin:0 0 16px; font-size:12px; }
+  .panel { margin:0 0 22px; }
+  .head { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin:0 0 4px; }
+  .name { font-weight:600; }
+  .range { color:var(--muted); font-variant-numeric:tabular-nums; font-size:12px; }
+  canvas { display:block; width:100%; border:1px solid var(--line); cursor:crosshair;
+           touch-action:none; background:var(--bg); }
+  .ctl { display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+         margin:0 0 14px; color:var(--muted); font-size:12px; }
+  button { font:inherit; padding:2px 9px; border:1px solid var(--line);
+           background:#f6f6f6; border-radius:3px; cursor:pointer; color:var(--fg); }
+  button:hover { background:#ececec; }
+  label { display:flex; align-items:center; gap:5px; cursor:pointer; }
+  .tip { position:fixed; pointer-events:none; background:rgba(20,20,20,.92);
+         color:#fff; padding:6px 9px; border-radius:4px; font-size:12px;
+         white-space:pre; display:none; z-index:10;
+         font-variant-numeric:tabular-nums; }
+  .legend { display:flex; gap:22px; flex-wrap:wrap; align-items:center;
+            margin:0 0 16px; font-size:12px; color:var(--muted); }
+  .ramp { display:inline-block; height:9px; width:120px; vertical-align:middle;
+          border:1px solid var(--line); }
+</style>
+</head>
+<body>
+<h1>alasight mirror - pnc_test_results_dust_regions_depth.tsv</h1>
+<p class="sub">1 panel(s), 771 stretch(es). The y axis is fixed; only x zooms, so a bar keeps its height and colour at every scale. Bars are drawn at their true width, which is far under a pixel until you zoom in.</p>
+<div class="ctl">
+  <span>Wheel to zoom x &middot; drag to pan &middot; double-click to reset</span>
+  <label><input type="checkbox" id="boost"> Widen bars thinner than a pixel</label>
+  <span id="boostnote"></span>
+</div>
+<div class="legend" id="legend"></div>
+<div id="panels"></div>
+<div class="tip" id="tip"></div>
+<script>
+const D = {"mode":"mirror","upSeries":"depth","downSeries":"drop","yTop":13.2,"yBot":13.2,"baselineH":0.18,"yTicks":[{"v":-13,"label":"1/8192"},{"v":-12,"label":"1/4096"},{"v":-11,"label":"1/2048"},{"v":-10,"label":"1/1024"},{"v":-9,"label":"1/512"},{"v":-8,"label":"1/256"},{"v":-7,"label":"1/128"},{"v":-6,"label":"1/64"},{"v":-5,"label":"1/32"},{"v":-4,"label":"1/16"},{"v":-3,"label":"1/8"},{"v":-2,"label":"1/4"},{"v":-1,"label":"1/2"},{"v":0,"label":""},{"v":1,"label":"2"},{"v":2,"label":"4"},{"v":3,"label":"8"},{"v":4,"label":"16"},{"v":5,"label":"32"},{"v":6,"label":"64"},{"v":7,"label":"128"},{"v":8,"label":"256"},{"v":9,"label":"512"},{"v":10,"label":"1024"},{"v":11,"label":"2048"},{"v":12,"label":"4096"},{"v":13,"label":"8192"}],"maxDepth":6155,"fracVmax":11.941231050303049,"fracLabel":"1/2048","upRamp":["#ffffcc","#fffdc6","#fffac1","#fff8bb","#fff6b6","#fff4b0","#fff1ab","#ffefa5","#ffeda0","#ffea9b","#ffe895","#ffe590","#fee38b","#fee085","#fede80","#fedb7b","#fed774","#fed36f","#fece6a","#fec965","#fec45f","#febf5a","#feba55","#feb54f","#feb04b","#feac49","#fea747","#fea245","#fd9e43","#fd9941","#fd953f","#fd903d","#fd883b","#fd8038","#fd7836","#fd7034","#fc6832","#fc612f","#fc592d","#fc512b","#fa4a29","#f74327","#f43d25","#f13624","#ed3022","#ea2920","#e7231e","#e41c1d","#df171d","#da141e","#d51020","#d00d21","#cb0a22","#c70723","#c20325","#bd0026","#b60026","#ae0026","#a60026","#9f0026","#970026","#8f0026","#880026","#800026"],"downRamp":["#ffffd9","#fdfed4","#fafdcf","#f8fcca","#f6fbc5","#f4fbc0","#f1fabb","#eff9b6","#edf8b1","#e8f6b1","#e3f4b2","#dff2b2","#daf0b3","#d5efb3","#d0edb3","#cbebb4","#c4e8b4","#bbe4b5","#b2e1b6","#a9ddb7","#a0dab8","#97d6b9","#8ed3ba","#85cfba","#7cccbb","#75c9bd","#6dc6be","#65c3bf","#5dc0c0","#55bec1","#4ebbc2","#46b8c3","#3eb3c4","#3aaec3","#35aac3","#31a5c2","#2ca1c2","#289cc1","#2397c1","#1f93c0","#1d8dbe","#1e86bb","#1f80b8","#1f7ab5","#2073b2","#216daf","#2166ac","#2260a9","#2259a6","#2354a3","#234fa1","#23499e","#24449c","#243f99","#253997","#253494","#21318d","#1e2e85","#1a2b7e","#172976","#13266f","#0f2367","#0c2060","#081d58"],"panelHeight":240,"panels":[{"name":"CP028374.1,NZ_CP013273.1,NR_179496.1,GB_GCA_031255515.1:20000-80000","xMax":60001,"plasmid":null,"dstarts":[719,13,24,823,50,98,405,204,465,172,377,198,555,577,130,161,8,29,265,631,380,40,192,286,396,39,3,157,98,955,87,353,640,257,84,147,44,75,221,136,23,46,25,128,304,5,50,402,453,684,327,59,12,45,36,15,112,102,9,40,10,23,541,45,80,146,119,129,137,618,85,26,38,1,12,113,83,65,53,27,57,75,38,5,305,12,185,177,12,20,101,93,445,6,25,93,12,274,357,294,237,56,81,1018,44,147,13,153,71,4,125,77,164,98,72,211,121,53,649,137,50,515,26653,3,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,2,4,1,1,12,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,3,7,1,1,1,2,5,10,2,2,4,1,1,1,3,7,1,1,3,22,6,10,1,6,2,35,1,1,3,1,2,1,1,1,1,1,3,2,4,16,1,1,1,1,3,1,1,6,1,1,1,1,3,1,1,1,3,1,3,3,7,2,1,1,1,1,1,1,1,2,2,1,5,4,1,1,2,1,2,1,2,1,1,1,2,1,1,3,1,1,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,2,2,1,1,1,2,3,2,3,1,1,1,4,2,2,4,2,1,1,1,6,17,1,1,1,1,4,1,1,40,1,2,1,4,4,1,1,5,3,2,1,1,1,2,1,13,1,9,1,2,1,2,4,1,1,5,2,2,1,1,2,1,1,1,1,2,2,2,1,1,5,1,3,2,1,46,22,1,2,6,1,1,1,1,1,4,1,1,2,1,4,1,2,5,1,3,2,1,7,1,1,1,1,1,2,2,3,1,12,1,1,1,1,8,1,1,1,1,1,1,4,3,4,1,1,3,1,2,1,1,1,1,1,1,2,2,6,1,1,5,1,2,1,1,1,3,3,1,1,1,1,1,1,2,2,1,1,1,3,1,1,10,3,1,14,3,1,4,2,4,4,2,1,1,2,1,1,1,1,1,1,1,1,3,2,1,1,2,4,1,1,1,1,2,1,2,1,1,1,8,1,1,1,2,1,2,3,1,1,1,1,1,1,1,1,1,3,1,1,1,2,3,3,3,1,2,1,2,7,1,6,3,1,1,3,2,1,1,1,1,1,1,1,1,1,1,3,3,1,1,1,1,40,1,1,1,3,2,2,2,1,2,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,5,3,1,5,1,2,1,1,1,1,1,2,2,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,2,15,7,5,2,1,2,13,1,4,1,6,3,6,3,3,2,1,1,2,1,1,2,2,3,1,1,2,1,1,1,1,1,5,1,1,3,1,1,12,1,1,2,4,1,1,1,2,1,3,2,1,9,15,1,4,2,1,1,1,2,5,5,1,2,15,2,2,5,1,1,3,1,2,1,4,8,7,1,1,1,1,1,1,1,1,1,1,1,1,4,1,3,1,1,1,1,1,1,1,1,4,5,9,1,1,1,3,1,1,4,1,3,10,2,2,3,2,2,1,4,1,2,1,3,2,5,9,5,1,1,2,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,6,1,1,1,3,1,9,6,2,1,1,2,1,1,1,1,1,1,1,1],"lens":[13,24,823,50,98,405,204,465,172,377,198,555,577,130,161,8,29,265,631,380,40,192,286,396,39,3,157,98,955,87,353,640,257,84,147,44,75,221,136,23,46,25,128,304,5,50,402,453,684,327,59,12,45,36,15,112,102,9,40,10,23,170,45,80,146,119,129,137,12,85,26,38,1,12,113,81,65,53,27,57,75,38,5,98,12,185,153,12,20,101,93,445,6,25,93,12,274,357,294,237,56,81,344,44,147,13,153,71,4,125,77,164,98,72,211,121,53,649,137,50,515,192,3,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,2,4,1,1,12,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,3,7,1,1,1,2,5,10,2,2,4,1,1,1,3,7,1,1,3,22,6,10,1,6,2,35,1,1,3,1,2,1,1,1,1,1,3,2,4,16,1,1,1,1,3,1,1,6,1,1,1,1,3,1,1,1,3,1,3,3,7,2,1,1,1,1,1,1,1,2,2,1,5,4,1,1,2,1,2,1,2,1,1,1,2,1,1,3,1,1,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,2,2,1,1,1,2,3,2,3,1,1,1,4,2,2,4,2,1,1,1,6,17,1,1,1,1,4,1,1,40,1,2,1,4,4,1,1,5,3,2,1,1,1,2,1,13,1,9,1,2,1,2,4,1,1,5,2,2,1,1,2,1,1,1,1,2,2,2,1,1,5,1,3,2,1,46,22,1,2,6,1,1,1,1,1,4,1,1,2,1,4,1,2,5,1,3,2,1,7,1,1,1,1,1,2,2,3,1,12,1,1,1,1,8,1,1,1,1,1,1,4,3,4,1,1,3,1,2,1,1,1,1,1,1,2,2,6,1,1,5,1,2,1,1,1,3,3,1,1,1,1,1,1,2,2,1,1,1,3,1,1,10,3,1,14,3,1,4,2,4,4,2,1,1,2,1,1,1,1,1,1,1,1,3,2,1,1,2,4,1,1,1,1,2,1,2,1,1,1,8,1,1,1,2,1,2,3,1,1,1,1,1,1,1,1,1,3,1,1,1,2,3,3,3,1,2,1,2,7,1,6,3,1,1,3,2,1,1,1,1,1,1,1,1,1,1,3,3,1,1,1,1,40,1,1,1,3,2,2,2,1,2,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,5,3,1,5,1,2,1,1,1,1,1,2,2,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,2,15,7,5,2,1,2,13,1,4,1,6,3,6,3,3,2,1,1,2,1,1,2,2,3,1,1,2,1,1,1,1,1,5,1,1,3,1,1,12,1,1,2,4,1,1,1,2,1,3,2,1,9,15,1,4,2,1,1,1,2,5,5,1,2,15,2,2,5,1,1,3,1,2,1,4,8,7,1,1,1,1,1,1,1,1,1,1,1,1,4,1,3,1,1,1,1,1,1,1,1,4,5,9,1,1,1,3,1,1,4,1,3,10,2,2,3,2,2,1,4,1,2,1,3,2,5,9,5,1,1,2,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,6,1,1,1,3,1,9,6,2,1,1,2,1,1,1,1,1,1,1,1,1],"depths":[2,4,5,6,4,5,4,5,4,5,4,5,4,3,4,3,4,3,2,3,2,3,4,5,4,3,2,3,2,3,2,3,4,5,4,5,4,3,4,5,6,5,4,5,6,5,4,3,2,3,4,5,6,5,4,3,4,5,6,4,3,2,2,3,2,3,2,3,2,2,3,4,3,4,3,4,4,5,6,5,4,3,4,3,2,3,2,2,3,4,3,2,3,4,5,4,3,2,3,2,3,4,2,2,3,2,3,4,3,2,3,2,3,2,3,2,3,2,3,4,2,3,2,5,18,41,283,800,2279,3423,4880,5373,5382,5383,5398,5400,5403,5412,5413,5414,5415,5511,5513,5516,5517,5518,5570,5573,5675,5674,5662,5611,5600,5554,4093,4085,3900,3890,3756,3750,3738,3730,3717,3698,3685,3668,3646,3633,3606,3513,3268,3135,2600,2580,2575,1565,1161,636,562,542,541,540,539,537,538,536,538,539,540,524,523,522,521,516,512,358,357,335,324,321,320,319,314,313,312,311,302,301,300,304,307,309,310,311,321,336,340,660,664,677,691,696,705,702,737,736,778,779,782,874,875,876,878,892,906,931,1051,1072,1107,1147,1149,1144,1145,1146,1008,949,1057,1648,1649,2761,2785,2798,2813,2814,3163,3164,3185,3184,3117,5242,5243,5244,5832,5834,5843,6152,6153,6154,6153,6155,6151,6153,6152,6151,6152,6151,6140,6139,6130,6122,6017,5160,5036,5031,5030,5015,5014,5009,4504,4503,4489,2866,2519,2520,2519,2518,2509,2411,1887,1645,1644,1643,1642,1570,879,872,609,599,598,597,593,544,525,513,505,504,452,444,421,420,413,409,378,380,382,398,399,406,408,515,517,1649,1651,1674,1676,1677,1678,1679,1680,1681,1679,1611,1608,1598,1599,1597,1468,1467,1461,1400,1357,1199,1214,1213,1212,1131,1130,1128,1127,1126,513,491,467,466,465,424,423,421,420,421,427,439,591,613,622,624,771,878,883,902,903,904,916,920,946,947,948,1080,1081,1082,1083,1093,1097,1124,1132,1133,1135,1152,1153,1154,1153,1146,1145,1124,1122,1121,1122,1158,1159,1169,1254,1258,1262,1270,1272,1273,1524,1952,1960,1964,1965,1963,1967,1972,1973,1974,1973,2091,2099,2268,2267,2270,2271,2272,2271,2272,2269,2271,2272,2271,2270,2268,2258,2255,2253,2173,1980,1978,1975,1972,1967,1683,1681,1680,1672,1671,1670,1669,1677,1683,1687,1703,1722,1723,1725,1746,1808,1809,1808,1806,1824,1861,2025,2254,2263,2264,2284,2286,2288,2289,2334,2428,2429,2426,2448,2445,2447,2448,2446,2434,2443,2432,2525,2524,2521,2524,2527,2526,2465,2452,2451,2449,2426,2284,2266,2231,2227,2226,2224,2223,2220,2217,2213,1989,1354,1352,1364,1356,1353,1341,1410,1411,1410,1412,1413,1414,1413,1412,1411,1409,1408,1405,1404,1369,1358,1356,1345,1333,1332,1331,1327,1320,1306,1304,1303,1300,1318,1618,1620,1622,1623,4757,4761,4763,4880,4882,5881,5962,5967,5970,5971,5981,5982,5984,5986,5987,5989,5990,5992,5991,5992,5993,5994,5997,5994,5984,5983,5982,5979,5974,5969,5950,5931,5847,5845,5843,5842,5840,5839,5837,5822,5817,5816,5752,4708,4197,3794,3588,3528,3374,3355,3349,3350,3349,3338,3331,3328,3327,3329,3330,3332,3336,3338,3337,3336,3302,3283,3281,3256,3012,3013,1703,1659,1657,1652,1404,1387,1386,1383,1326,1305,1139,1120,1067,1006,1002,917,918,899,901,900,897,896,895,890,870,854,851,847,838,836,825,819,813,812,814,823,824,825,835,836,841,844,849,848,890,894,895,908,982,976,979,989,988,1072,1075,1076,1077,1078,1089,1125,1124,1356,1627,1795,4061,4972,5104,5130,5175,5176,5177,5208,5219,5230,5227,5231,5232,5234,5232,5223,5284,5283,5282,5280,5277,5123,1860,1803,1798,1797,1766,1759,1758,1757,1756,1747,1732,1729,1728,1726,1725,1724,1723,1724,1725,1726,1727,1728,1729,1731,1740,1742,1749,1766,1772,1775,1779,1780,1801,2608,3008,3012,3014,3022,3023,3039,3044,3053,3054,3056,3047,3040,3027,3026,3001,2998,2957,2956,2635,2616,2615,2614,2611,2610,2607,2603,2525,20,12,3],"hits":[2,3,4,5,3,4,3,3,3,3,3,4,3,3,3,2,3,2,2,3,2,3,4,4,3,3,2,3,2,3,2,3,4,5,4,5,4,3,4,4,4,3,3,4,5,4,3,3,2,3,3,3,4,4,3,3,3,3,4,4,3,2,2,2,1,2,1,1,1,2,3,3,2,3,3,3,3,3,4,4,3,3,3,2,2,2,2,2,2,2,2,2,2,3,3,3,3,2,3,2,3,3,1,2,2,2,2,2,2,2,2,2,2,2,3,2,3,2,2,2,2,3,1,4,9,17,270,662,1202,1795,2258,2294,2300,2300,2306,2306,2306,2308,2309,2310,2310,2332,2332,2332,2332,2332,2335,2335,2342,2342,2331,2327,2326,2325,1713,1713,1707,1704,1700,1699,1698,1698,1697,1696,1696,1695,1695,1692,1690,1678,1673,1649,1471,1469,1469,1155,1034,951,935,933,932,931,929,928,929,927,929,930,931,911,911,909,907,901,900,707,706,662,656,651,639,638,615,613,613,611,586,584,583,585,586,589,590,591,608,640,644,941,942,954,967,969,972,964,983,982,1004,1005,1005,1043,1044,1045,1045,1048,1063,1074,1090,1090,1102,1106,1109,1109,1109,1109,884,832,888,1324,1325,1879,1887,1891,1902,1902,1970,1972,1972,1972,1891,2754,2754,2755,3237,3237,3242,3350,3350,3351,3351,3351,3351,3352,3352,3352,3353,3353,3351,3351,3351,3351,3325,2831,2816,2816,2816,2812,2812,2812,2588,2588,2587,1989,1907,1907,1907,1907,1901,1868,1614,1480,1479,1478,1478,1459,1016,1015,739,734,733,732,731,723,721,721,721,721,625,618,607,606,601,595,560,561,562,573,574,574,574,578,578,1197,1197,1208,1209,1210,1211,1211,1211,1212,1212,1208,1208,1199,1199,1199,1151,1151,1148,1126,1122,1003,1007,1007,1007,985,985,985,985,985,609,603,594,593,593,587,587,586,586,587,590,600,755,775,783,785,911,1035,1035,1050,1050,1050,1055,1057,1075,1075,1075,1261,1261,1261,1262,1266,1268,1287,1290,1290,1290,1291,1291,1292,1292,1281,1281,1280,1280,1280,1280,1318,1319,1321,1363,1363,1364,1364,1365,1365,1532,1755,1762,1762,1762,1735,1739,1740,1740,1741,1741,1780,1781,1803,1802,1804,1804,1804,1804,1804,1801,1801,1801,1800,1799,1799,1797,1797,1796,1768,1647,1646,1646,1645,1643,1477,1477,1476,1476,1476,1476,1476,1476,1476,1476,1476,1479,1479,1480,1486,1515,1515,1515,1512,1517,1533,1553,1593,1593,1593,1597,1597,1598,1598,1601,1601,1601,1596,1596,1596,1596,1596,1596,1598,1600,1591,1633,1633,1633,1635,1636,1636,1636,1636,1636,1635,1634,1629,1628,1628,1628,1628,1628,1628,1628,1628,1625,1485,1256,1256,1280,1279,1280,1275,1307,1307,1307,1307,1307,1307,1306,1306,1305,1304,1304,1304,1304,1241,1241,1241,1239,1237,1237,1237,1237,1234,1234,1234,1234,1234,1244,1354,1354,1354,1354,2637,2638,2639,2720,2721,3255,3320,3320,3320,3320,3326,3326,3326,3326,3327,3327,3327,3328,3328,3328,3329,3329,3330,3330,3322,3321,3321,3322,3322,3321,3321,3321,3290,3290,3290,3290,3289,3289,3289,3288,3288,3288,3275,2891,2756,2516,2385,2362,2302,2289,2289,2289,2289,2284,2283,2283,2283,2285,2286,2286,2288,2290,2289,2286,2268,2264,2263,2244,2123,2127,1438,1430,1430,1428,1250,1246,1245,1243,1220,1203,1120,1112,1070,1047,1044,1031,1031,1019,1020,1020,1018,1018,1018,1018,1010,995,995,993,990,990,989,988,986,986,986,989,989,989,995,996,996,997,1001,1000,1038,1039,1039,1058,1119,1114,1113,1120,1120,1164,1168,1168,1169,1169,1174,1189,1187,1349,1448,1557,2843,3527,3547,3548,3549,3550,3551,3563,3563,3565,3565,3566,3567,3567,3566,3565,3576,3576,3576,3575,3575,3545,1281,1271,1267,1267,1263,1263,1261,1260,1259,1255,1244,1242,1241,1241,1240,1240,1240,1243,1244,1245,1246,1246,1247,1248,1263,1263,1268,1268,1269,1270,1271,1271,1276,1751,1883,1885,1885,1888,1888,1892,1892,1892,1892,1891,1887,1884,1884,1884,1879,1879,1875,1874,1770,1770,1769,1768,1767,1767,1767,1767,1757,7,4,1],"avails":[7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,1440,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7891,7891,7891,7891,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,1440,1440,1,1440,1,1,1,7865,7865,7865,7865,7891,7891,7891,7865,7865,7865,7865,7865,7865,7865,7865,1440,1440,1440,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,1,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,1,520,3738,7865,7865,7865,7865,7865,7865,7865,7865,7865,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,7891,7891,7891,7891,7891,7891,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7913,7913,7913,7913,7913,7913,7913,7913,7913,7913,7913,7913,7913,7913,7913,7913,7913,7913,7913,7913,7913,7913,7913,7913,7891,7891,7891,7891,7891,7891,7891,7891,7891,7891,7891,7891,7891,7891,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,7947,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,7947,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,7865,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,8292,7865,1],"regions":[[719,13574],[13945,14613],[15219,15575],[15577,15995],[16202,16552],[16576,19026],[19700,22596],[49057,50592]]}]};
+
+/* Starts are delta-encoded, being sorted; undo that once. */
+function undelta(a) {
+  const out = new Float64Array(a.length);
+  let acc = 0;
+  for (let i = 0; i < a.length; i++) { acc += a[i]; out[i] = acc; }
+  return out;
+}
+for (const p of D.panels) {
+  p.starts = undelta(p.dstarts);
+  delete p.dstarts;
+  p.view = { x0: 0, x1: p.xMax };
+}
+
+const PAD = { l: 74, r: 14, t: 8, b: 26 };
+
+/* Same mappings the static figures use, so a bar keeps its height and colour
+   whatever the view: LogNorm(1, maxDepth) for depth, Normalize(0, fracVmax)
+   for the fraction's drop. */
+function depthHeight(depth) { return depth < 2 ? 0 : Math.log2(depth); }
+function dropHeight(hit, avail) {
+  if (!(hit > 0 && avail > 0)) return 0;
+  const f = Math.min(1, hit / avail);
+  return f >= 1 ? 0 : -Math.log2(f);
+}
+function pick(ramp, t) {
+  return ramp[Math.max(0, Math.min(ramp.length - 1,
+         Math.round(t * (ramp.length - 1))))];
+}
+function depthColor(depth) {
+  if (!(D.maxDepth > 1)) return D.upRamp[0];
+  return pick(D.upRamp, Math.log(Math.max(1, depth)) / Math.log(D.maxDepth));
+}
+function dropColor(drop) {
+  return pick(D.downRamp, D.fracVmax > 0 ? drop / D.fracVmax : 0);
+}
+/* Which quantity a series carries decides its height AND its colour, so the
+   fraction keeps its own ramp whether it is drawn above the axis (fraction
+   mode) or below it (mirror). Inferring direction from the mode is what put
+   the fraction below the axis in a mode whose axis has no room there. */
+function seriesHeight(kind, p, i) {
+  return kind === "depth" ? depthHeight(p.depths[i])
+                          : dropHeight(p.hits[i], p.avails[i]);
+}
+function seriesColor(kind, p, i, h) {
+  return kind === "depth" ? depthColor(p.depths[i]) : dropColor(h);
+}
+
+function niceTicks(x0, x1, want) {
+  const span = x1 - x0;
+  if (!(span > 0)) return [];
+  const raw = span / want;
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  let step = mag;
+  for (const m of [1, 2, 2.5, 5, 10]) if (mag * m >= raw) { step = mag * m; break; }
+  const out = [];
+  for (let v = Math.ceil(x0 / step) * step; v <= x1; v += step) out.push(v);
+  return out;
+}
+function bp(v) {
+  const a = Math.abs(v);
+  if (a >= 1e6) return (v / 1e6).toFixed(a >= 1e7 ? 1 : 2) + " Mb";
+  if (a >= 1e3) return (v / 1e3).toFixed(a >= 1e5 ? 0 : 1) + " kb";
+  return Math.round(v) + " bp";
+}
+
+/* First index whose stretch can still reach x: starts are sorted, so binary
+   search the left edge and walk forward. Only the visible slice is drawn, which
+   is what keeps a zoomed view fast on a track of a hundred thousand stretches. */
+function firstFrom(starts, x) {
+  let lo = 0, hi = starts.length;
+  while (lo < hi) { const m = (lo + hi) >> 1; if (starts[m] < x) lo = m + 1; else hi = m; }
+  return lo;
+}
+
+function draw(p) {
+  const cv = p.canvas, ctx = cv.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = cv.clientWidth, cssH = p.cssH;
+  if (cv.width !== Math.round(cssW * dpr) || cv.height !== Math.round(cssH * dpr)) {
+    cv.width = Math.round(cssW * dpr);
+    cv.height = Math.round(cssH * dpr);
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cssW, cssH);
+
+  const plotW = cssW - PAD.l - PAD.r, plotH = cssH - PAD.t - PAD.b;
+  const span = D.yTop + D.yBot;
+  const X = v => PAD.l + (v - p.view.x0) / (p.view.x1 - p.view.x0) * plotW;
+  const Y = v => PAD.t + (D.yTop - v) / span * plotH;
+  const minW = document.getElementById("boost").checked ? 1 / dpr : 0;
+
+  /* Known plasmid extent, behind everything. */
+  if (p.plasmid) {
+    ctx.fillStyle = "rgba(31,119,180,0.13)";
+    const a = X(p.plasmid[0]), b = X(p.plasmid[1]);
+    ctx.fillRect(a, Y(D.yTop), b - a, Y(-D.yBot) - Y(D.yTop));
+  }
+
+  /* Called-region strips, so a region with no bar either way still shows. */
+  ctx.fillStyle = "#737373";
+  const h0 = Y(0), sh = Math.max(1, (D.baselineH / span) * plotH);
+  for (const [rs, re] of p.regions) {
+    if (re < p.view.x0 || rs > p.view.x1) continue;
+    const a = X(rs), b = X(re);
+    ctx.fillRect(a, h0 - sh / 2, Math.max(b - a, minW), sh);
+  }
+
+  /* Bars at their true width. Canvas antialiases a sub-pixel rectangle to
+     partial coverage and accumulates it across overlapping draws, so a dense
+     view reads as density rather than vanishing - and it does so identically
+     in every browser, unlike a thin SVG path. */
+  let drawn = 0;
+  const i0 = firstFrom(p.starts, p.view.x0 - p.maxLen);
+  for (let i = i0; i < p.starts.length; i++) {
+    const s = p.starts[i];
+    if (s > p.view.x1) break;
+    const e = s + p.lens[i];
+    if (e < p.view.x0) continue;
+    const x = X(s), w = Math.max(X(e) - x, minW);
+    if (D.upSeries) {
+      const hh = seriesHeight(D.upSeries, p, i);
+      if (hh > 0) {
+        ctx.fillStyle = seriesColor(D.upSeries, p, i, hh);
+        ctx.fillRect(x, Y(hh), w, h0 - Y(hh));
+      }
+    }
+    if (D.downSeries) {
+      const dd = seriesHeight(D.downSeries, p, i);
+      if (dd > 0) {
+        ctx.fillStyle = seriesColor(D.downSeries, p, i, dd);
+        ctx.fillRect(x, h0, w, Y(-dd) - h0);
+      }
+    }
+    drawn++;
+  }
+
+  /* Axes last, over the data. */
+  ctx.strokeStyle = "#444"; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(PAD.l, h0); ctx.lineTo(cssW - PAD.r, h0); ctx.stroke();
+  ctx.strokeStyle = "#bbb";
+  ctx.strokeRect(PAD.l, PAD.t, plotW, plotH);
+
+  ctx.fillStyle = "#333"; ctx.font = "10px sans-serif";
+  ctx.textAlign = "right"; ctx.textBaseline = "middle";
+  for (const t of D.yTicks) {
+    const y = Y(t.v);
+    if (y < PAD.t - 1 || y > PAD.t + plotH + 1) continue;
+    ctx.strokeStyle = "#ccc";
+    ctx.beginPath(); ctx.moveTo(PAD.l - 3, y); ctx.lineTo(PAD.l, y); ctx.stroke();
+    if (t.label) ctx.fillText(t.label, PAD.l - 6, y);
+  }
+  ctx.textAlign = "center"; ctx.textBaseline = "top";
+  for (const v of niceTicks(p.view.x0, p.view.x1, 8)) {
+    const x = X(v);
+    ctx.strokeStyle = "#ccc";
+    ctx.beginPath(); ctx.moveTo(x, PAD.t + plotH); ctx.lineTo(x, PAD.t + plotH + 3); ctx.stroke();
+    ctx.fillStyle = "#333";
+    ctx.fillText(bp(v), x, PAD.t + plotH + 5);
+  }
+
+  const perPx = (p.view.x1 - p.view.x0) / plotW;
+  p.readout.textContent =
+    bp(p.view.x0) + " \u2013 " + bp(p.view.x1) +
+    "  (" + bp(p.view.x1 - p.view.x0) + " wide, " +
+    (perPx < 1 ? (1 / perPx).toFixed(0) + " px/bp" : perPx.toFixed(0) + " bp/px") +
+    ", " + drawn.toLocaleString() + " stretch" + (drawn === 1 ? "" : "es") + " in view)";
+}
+
+function clampView(p) {
+  const minSpan = 50;
+  if (p.view.x1 - p.view.x0 < minSpan) {
+    const c = (p.view.x0 + p.view.x1) / 2;
+    p.view.x0 = c - minSpan / 2; p.view.x1 = c + minSpan / 2;
+  }
+  if (p.view.x1 - p.view.x0 > p.xMax) { p.view.x0 = 0; p.view.x1 = p.xMax; return; }
+  if (p.view.x0 < 0) { p.view.x1 -= p.view.x0; p.view.x0 = 0; }
+  if (p.view.x1 > p.xMax) { p.view.x0 -= p.view.x1 - p.xMax; p.view.x1 = p.xMax; }
+  if (p.view.x0 < 0) p.view.x0 = 0;
+}
+
+const tip = document.getElementById("tip");
+
+function attach(p) {
+  const cv = p.canvas;
+  const toBp = ev => {
+    const r = cv.getBoundingClientRect();
+    const plotW = r.width - PAD.l - PAD.r;
+    const frac = (ev.clientX - r.left - PAD.l) / plotW;
+    return p.view.x0 + frac * (p.view.x1 - p.view.x0);
+  };
+  cv.addEventListener("wheel", ev => {
+    ev.preventDefault();
+    const at = toBp(ev);
+    const f = Math.pow(1.0018, ev.deltaY);
+    p.view.x0 = at - (at - p.view.x0) * f;
+    p.view.x1 = at + (p.view.x1 - at) * f;
+    clampView(p); draw(p);
+  }, { passive: false });
+
+  let dragging = null;
+  cv.addEventListener("pointerdown", ev => {
+    dragging = { bp: toBp(ev), x0: p.view.x0, x1: p.view.x1 };
+    cv.setPointerCapture(ev.pointerId);
+  });
+  cv.addEventListener("pointerup", () => { dragging = null; });
+  cv.addEventListener("pointerleave", () => { tip.style.display = "none"; });
+  cv.addEventListener("pointermove", ev => {
+    if (dragging) {
+      const r = cv.getBoundingClientRect();
+      const plotW = r.width - PAD.l - PAD.r;
+      const perPx = (dragging.x1 - dragging.x0) / plotW;
+      const at = dragging.x0 + (ev.clientX - r.left - PAD.l) * perPx;
+      const shift = dragging.bp - at;
+      p.view.x0 = dragging.x0 + shift; p.view.x1 = dragging.x1 + shift;
+      clampView(p); draw(p);
+      return;
+    }
+    /* Nearest stretch under the cursor, within a pixel. */
+    const at = toBp(ev);
+    const r = cv.getBoundingClientRect();
+    const perPx = (p.view.x1 - p.view.x0) / (r.width - PAD.l - PAD.r);
+    let best = -1, bestD = perPx * 2;
+    for (let i = firstFrom(p.starts, at - p.maxLen); i < p.starts.length; i++) {
+      const s = p.starts[i];
+      if (s > at + bestD) break;
+      const e = s + p.lens[i];
+      const d = at < s ? s - at : (at > e ? at - e : 0);
+      if (d < bestD) { bestD = d; best = i; if (d === 0) break; }
+    }
+    if (best < 0) { tip.style.display = "none"; return; }
+    const parts = [bp(p.starts[best]) + " \u2013 " + bp(p.starts[best] + p.lens[best]) +
+                   "  (" + p.lens[best].toLocaleString() + " bp)"];
+    if (D.upSeries === "depth" || D.downSeries === "depth")
+      parts.push("clades: " + p.depths[best].toLocaleString());
+    if (D.upSeries === "drop" || D.downSeries === "drop") {
+      const h = p.hits[best], a = p.avails[best];
+      parts.push(h > 0 && a > 0
+        ? "leaves hit: " + h.toLocaleString() + " of " + a.toLocaleString() +
+          "  (1/" + (a / h).toFixed(a / h >= 10 ? 0 : 1) + ")"
+        : "leaves hit: none in the tree");
+    }
+    tip.textContent = parts.join("\n");
+    tip.style.display = "block";
+    tip.style.left = Math.min(window.innerWidth - 220, ev.clientX + 12) + "px";
+    tip.style.top = (ev.clientY + 14) + "px";
+  });
+  cv.addEventListener("dblclick", () => {
+    p.view.x0 = 0; p.view.x1 = p.xMax; draw(p);
+  });
+}
+
+/* Build the page. */
+const host = document.getElementById("panels");
+D.panels.forEach((p, i) => {
+  p.cssH = D.panelHeight;
+  /* A loop, not Math.max(...arr) or .apply: those pass every element as an
+     argument, and a track of a hundred thousand stretches overflows the
+     call stack outright. */
+  p.maxLen = 0;
+  for (let i = 0; i < p.lens.length; i++) if (p.lens[i] > p.maxLen) p.maxLen = p.lens[i];
+  const wrap = document.createElement("div");
+  wrap.className = "panel";
+  const head = document.createElement("div");
+  head.className = "head";
+  const nm = document.createElement("span");
+  nm.className = "name"; nm.textContent = (i + 1) + ". " + p.name;
+  const ro = document.createElement("span");
+  ro.className = "range";
+  const rst = document.createElement("button");
+  rst.textContent = "Reset";
+  rst.onclick = () => { p.view.x0 = 0; p.view.x1 = p.xMax; draw(p); };
+  head.append(nm, ro, rst);
+  const cv = document.createElement("canvas");
+  wrap.append(head, cv);
+  host.append(wrap);
+  p.canvas = cv; p.readout = ro;
+  attach(p);
+});
+
+/* Colour keys, matching the static figures' colourbars. */
+function rampSwatch(ramp, lo, hi, label) {
+  const c = document.createElement("canvas");
+  c.width = 120; c.height = 9; c.className = "ramp";
+  const g = c.getContext("2d");
+  for (let x = 0; x < 120; x++) {
+    g.fillStyle = ramp[Math.round(x / 119 * (ramp.length - 1))];
+    g.fillRect(x, 0, 1, 9);
+  }
+  const box = document.createElement("span");
+  box.append(document.createTextNode(label + " " + lo + " "), c,
+             document.createTextNode(" " + hi));
+  return box;
+}
+const legend = document.getElementById("legend");
+if (D.upSeries === "depth" || D.downSeries === "depth")
+  legend.append(rampSwatch(D.upRamp, "1", String(D.maxDepth), "clades"));
+if (D.upSeries === "drop" || D.downSeries === "drop")
+  legend.append(rampSwatch(D.downRamp, "1", D.fracLabel, "fraction hit"));
+
+document.getElementById("boost").onchange = ev => {
+  document.getElementById("boostnote").textContent = ev.target.checked
+    ? "On: a stretch narrower than a pixel is drawn one pixel wide, so it is visible but wider than it is."
+    : "";
+  D.panels.forEach(draw);
+};
+window.addEventListener("resize", () => D.panels.forEach(draw));
+D.panels.forEach(draw);
+</script>
+</body>
+</html>
