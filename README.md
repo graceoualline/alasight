@@ -68,7 +68,7 @@ If you can guarantee that your genome collection is all separate species, as it 
 
 # EXAMPLE / TEST
 # should take 2 minutes using 46 threads
-./alasight.py run -d work_dir/alasight_gtdb/database -tr work_dir/alasight_gtdb/tree -q test/plasmid_and_conserved_example.fasta -o test/pnc_test_results/ -t 46
+./alasight.py run -d work_dir/database -tr work_dir/tree -q test/plasmid_and_conserved_example.fasta -o test/pnc_test_results/ -t 46
 ```
 #### Visualization
 
